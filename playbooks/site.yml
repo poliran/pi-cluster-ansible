@@ -1,25 +1,26 @@
 ---
 - name: Configure all Raspberry Pi servers
   hosts: all
-  become: yes
+  become: true
   roles:
     - common
 
 - name: Setup database server
   hosts: database_servers
-  become: yes
+  become: true
   roles:
     - database
 
 - name: Setup web servers
   hosts: web_servers
-  become: yes
+  become: true
   roles:
     - nodejs
     - webapp
 
 - name: Setup load balancer
   hosts: load_balancers
-  become: yes
+  become: true
   roles:
     - nginx
+    - angular

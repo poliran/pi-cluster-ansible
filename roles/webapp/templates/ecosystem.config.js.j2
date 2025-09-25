@@ -1,23 +1,19 @@
 module.exports = {
   apps: [{
-    name: '{{ app_name }}',
+    name: '{{ webapp_app_name }}',
     script: 'app.js',
-    cwd: '{{ app_dir }}',
+    cwd: '{{ webapp_app_dir }}',
     instances: 1,
-    exec_mode: 'fork',
+    autorestart: true,
+    watch: false,
+    max_memory_restart: '{{ webapp_max_old_space_size }}M',
     env: {
       NODE_ENV: 'production',
-      PORT: {{ app_port }},
-      DB_HOST: '{{ db_host }}',
-      DB_NAME: '{{ db_name }}',
-      DB_USER: '{{ db_user }}',
-      DB_PASSWORD: '{{ db_password }}'
-    },
-    log_file: '/var/log/pm2/{{ app_name }}.log',
-    out_file: '/var/log/pm2/{{ app_name }}-out.log',
-    error_file: '/var/log/pm2/{{ app_name }}-error.log',
-    log_date_format: 'YYYY-MM-DD HH:mm:ss Z',
-    merge_logs: true,
-    max_memory_restart: '400M'
+      PORT: {{ webapp_app_port }},
+      DB_HOST: '{{ webapp_db_host }}',
+      DB_NAME: '{{ webapp_db_name }}',
+      DB_USER: '{{ webapp_db_user }}',
+      DB_PASSWORD: '{{ webapp_db_password }}'
+    }
   }]
 };

@@ -1,7 +1,9 @@
 ---
 - name: restart webapp
-  become_user: "{{ app_user }}"
-  shell: |
-    cd {{ app_dir }}
-    pm2 restart {{ app_name }} || pm2 start ecosystem.config.js
+  become: true
+  become_user: "{{ webapp_app_user }}"
+  ansible.builtin.shell: |
+    cd {{ webapp_app_dir }}
+    pm2 restart {{ webapp_app_name }} || pm2 start ecosystem.config.js
     pm2 save
+  changed_when: true

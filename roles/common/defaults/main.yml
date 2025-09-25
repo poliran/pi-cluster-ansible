@@ -1,3 +1,3 @@
 ---
 # Default variables for common role
-app_user: "mpi"
+common_app_user: "mpi"

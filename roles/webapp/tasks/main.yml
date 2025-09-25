@@ -1,119 +1,84 @@
 ---
-- name: Create placeholder application
-  file:
-    path: "{{ app_dir }}"
+- name: Create application directory
+  ansible.builtin.file:
+    path: "{{ webapp_app_dir }}"
     state: directory
-    owner: "{{ app_user }}"
-    group: "{{ app_user }}"
-    mode: '0755'
+    owner: "{{ webapp_app_user }}"
+    group: "{{ webapp_app_user }}"
+    mode: "0755"
   tags:
     - webapp
-    - app
+    - directory
 
-- name: Create package.json
-  copy:
-    content: |
-      {
-        "name": "{{ app_name }}",
-        "version": "1.0.0",
-        "description": "MPI Cluster Application",
-        "main": "app.js",
-        "scripts": {
-          "start": "node app.js"
-        },
-        "dependencies": {
-          "express": "^4.18.2"
-        }
-      }
-    dest: "{{ app_dir }}/package.json"
-    owner: "{{ app_user }}"
-    group: "{{ app_user }}"
-    mode: '0644'
+- name: Copy application files
+  ansible.builtin.copy:
+    src: "{{ item }}"
+    dest: "{{ webapp_app_dir }}/{{ item }}"
+    owner: "{{ webapp_app_user }}"
+    group: "{{ webapp_app_user }}"
+    mode: "0644"
+  loop:
+    - app.js
+    - package.json
+  notify: restart webapp
   tags:
     - webapp
-    - app
-
-- name: Create application file
-  copy:
-    content: |
-      const express = require('express');
-      const app = express();
-      const port = process.env.PORT || {{ app_port }};
-
-      app.get('/', (req, res) => {
-        res.json({
-          message: 'MPI Cluster Application',
-          status: 'running',
-          port: port,
-          timestamp: new Date().toISOString()
-        });
-      });
-
-      app.get('/health', (req, res) => {
-        res.json({ status: 'healthy' });
-      });
-
-      app.listen(port, '0.0.0.0', () => {
-        console.log(`Server running on port ${port}`);
-      });
-    dest: "{{ app_dir }}/app.js"
-    owner: "{{ app_user }}"
-    group: "{{ app_user }}"
-    mode: '0755'
-  tags:
-    - webapp
-    - app
+    - deploy
 
 - name: Install Node.js dependencies
-  npm:
-    path: "{{ app_dir }}"
-    production: yes
-  become_user: "{{ app_user }}"
+  community.general.npm:
+    path: "{{ webapp_app_dir }}"
+    production: true
+  become: true
+  become_user: "{{ webapp_app_user }}"
   tags:
     - webapp
     - dependencies
 
 - name: Create PM2 ecosystem file
-  template:
+  ansible.builtin.template:
     src: ecosystem.config.js.j2
-    dest: "{{ app_dir }}/ecosystem.config.js"
-    owner: "{{ app_user }}"
-    group: "{{ app_user }}"
+    dest: "{{ webapp_app_dir }}/ecosystem.config.js"
+    owner: "{{ webapp_app_user }}"
+    group: "{{ webapp_app_user }}"
+    mode: "0644"
   notify: restart webapp
   tags:
     - webapp
-    - pm2
+    - config
 
 - name: Create application environment file
-  template:
+  ansible.builtin.template:
     src: .env.j2
-    dest: "{{ app_dir }}/.env"
-    owner: "{{ app_user }}"
-    group: "{{ app_user }}"
-    mode: '0600'
+    dest: "{{ webapp_app_dir }}/.env"
+    owner: "{{ webapp_app_user }}"
+    group: "{{ webapp_app_user }}"
+    mode: "0600"
   notify: restart webapp
   tags:
     - webapp
     - config
 
 - name: Start application with PM2
-  become_user: "{{ app_user }}"
-  shell: |
-    cd {{ app_dir }}
-    pm2 delete {{ app_name }} || true
+  become: true
+  become_user: "{{ webapp_app_user }}"
+  ansible.builtin.shell: |
+    cd {{ webapp_app_dir }}
+    pm2 delete {{ webapp_app_name }} || true
     pm2 start ecosystem.config.js
     pm2 save
   environment:
-    NODE_OPTIONS: "--max-old-space-size={{ max_old_space_size }}"
+    NODE_OPTIONS: "--max-old-space-size={{ webapp_max_old_space_size }}"
+  changed_when: true
   tags:
     - webapp
-    - pm2
+    - service
 
 - name: Setup PM2 startup script
-  shell: |
-    env PATH=$PATH:/usr/bin pm2 startup systemd -u {{ app_user }} --hp /home/{{ app_user }}
-  args:
-    creates: /etc/systemd/system/pm2-{{ app_user }}.service
+  ansible.builtin.shell: |
+    env PATH=$PATH:/usr/bin pm2 startup systemd -u {{ webapp_app_user }} --hp /home/{{ webapp_app_user }}
+    systemctl enable pm2-{{ webapp_app_user }}
+  changed_when: true
   tags:
     - webapp
-    - pm2
+    - startup

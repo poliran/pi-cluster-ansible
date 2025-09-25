@@ -1,6 +1,6 @@
 ---
 - name: Install Nginx
-  apt:
+  ansible.builtin.apt:
     name: nginx
     state: present
   tags:
@@ -8,7 +8,7 @@
     - packages
 
 - name: Remove default Nginx configuration
-  file:
+  ansible.builtin.file:
     path: /etc/nginx/sites-enabled/default
     state: absent
   notify: restart nginx
@@ -17,18 +17,19 @@
     - config
 
 - name: Create Nginx configuration
-  template:
+  ansible.builtin.template:
     src: nginx.conf.j2
-    dest: /etc/nginx/sites-available/{{ app_name }}
+    dest: /etc/nginx/sites-available/{{ nginx_app_name }}
+    mode: "0644"
   notify: restart nginx
   tags:
     - nginx
     - config
 
 - name: Enable Nginx configuration
-  file:
-    src: /etc/nginx/sites-available/{{ app_name }}
-    dest: /etc/nginx/sites-enabled/{{ app_name }}
+  ansible.builtin.file:
+    src: /etc/nginx/sites-available/{{ nginx_app_name }}
+    dest: /etc/nginx/sites-enabled/{{ nginx_app_name }}
     state: link
   notify: restart nginx
   tags:
@@ -36,10 +37,10 @@
     - config
 
 - name: Start and enable Nginx
-  systemd:
+  ansible.builtin.systemd:
     name: nginx
     state: started
-    enabled: yes
+    enabled: true
   tags:
     - nginx
     - service

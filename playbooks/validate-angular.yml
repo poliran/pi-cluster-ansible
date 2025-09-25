@@ -1,0 +1,55 @@
+---
+- name: Validate Angular Dashboard Deployment
+  hosts: localhost
+  gather_facts: false
+  vars:
+    lb_host: "{{ hostvars['pi-lb']['ansible_host'] }}"
+  tasks:
+    - name: Test Angular dashboard main page
+      ansible.builtin.uri:
+        url: "http://{{ lb_host }}/"
+        return_content: true
+      register: dashboard_response
+      
+    - name: Verify dashboard contains expected elements
+      ansible.builtin.assert:
+        that:
+          - "'Pi Cluster Dashboard' in dashboard_response.content"
+          - "'Refresh Status' in dashboard_response.content"
+          - "'loadClusterStatus' in dashboard_response.content"
+        success_msg: "Angular dashboard deployed successfully!"
+        fail_msg: "Dashboard missing expected content"
+        
+    - name: Test API endpoint through dashboard
+      ansible.builtin.uri:
+        url: "http://{{ lb_host }}/api/"
+        return_content: true
+      register: api_response
+      
+    - name: Verify API response
+      ansible.builtin.assert:
+        that:
+          - "api_response.status == 200"
+          - "'Pi Cluster Web App' in api_response.json.message"
+          - "api_response.json.database == 'connected'"
+        success_msg: "API endpoint working correctly!"
+        fail_msg: "API endpoint not responding properly"
+        
+    - name: Display deployment summary
+      ansible.builtin.debug:
+        msg: |
+          🎉 Angular Dashboard Successfully Deployed!
+          
+          Dashboard URL: http://{{ lb_host }}/
+          API Endpoint: http://{{ lb_host }}/api/
+          
+          Features:
+          - Real-time cluster monitoring
+          - Load balancing visualization  
+          - Server status tracking
+          - Database connectivity monitoring
+          - Auto-refresh every 10 seconds
+          
+          Backend Server: {{ api_response.json.server }}
+          Database Status: {{ api_response.json.database }}
+          Server Uptime: {{ api_response.json.uptime }}

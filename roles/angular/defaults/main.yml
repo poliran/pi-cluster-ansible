@@ -1,0 +1,4 @@
+---
+# Angular role defaults
+angular_build_dir: "/tmp/angular-build"
+angular_web_root: "/var/www/html"

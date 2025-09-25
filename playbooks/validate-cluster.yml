@@ -1,0 +1,42 @@
+---
+- name: Comprehensive Pi Cluster Validation
+  hosts: localhost
+  gather_facts: false
+  vars:
+    lb_host: "{{ hostvars['pi-lb']['ansible_host'] }}"
+  tasks:
+    - name: Test load balancer multiple times
+      ansible.builtin.uri:
+        url: "http://{{ lb_host }}/"
+        return_content: true
+      register: lb_responses
+      loop: "{{ range(1, 6) | list }}"
+      
+    - name: Display load balancer responses
+      ansible.builtin.debug:
+        msg: "Request {{ item.item }}: Server {{ item.json.server }} - {{ item.json.message }}"
+      loop: "{{ lb_responses.results }}"
+      
+    - name: Test health endpoint through load balancer
+      ansible.builtin.uri:
+        url: "http://{{ lb_host }}/health"
+        return_content: true
+      register: health_response
+      
+    - name: Display health check
+      ansible.builtin.debug:
+        msg: "Health check: {{ health_response.json }}"
+
+- name: Validate individual services
+  hosts: all
+  tasks:
+    - name: Check service status
+      ansible.builtin.service_facts:
+      
+    - name: Display critical services
+      ansible.builtin.debug:
+        msg: "{{ inventory_hostname }}: {{ item }} - {{ ansible_facts.services[item].state | default('not found') }}"
+      loop:
+        - mariadb.service
+        - nginx.service
+      when: item in ansible_facts.services

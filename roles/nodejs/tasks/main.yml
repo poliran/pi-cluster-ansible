@@ -1,6 +1,6 @@
 ---
 - name: Download NodeJS setup script
-  get_url:
+  ansible.builtin.get_url:
     url: "https://deb.nodesource.com/setup_{{ nodejs_version }}.x"
     dest: /tmp/nodejs_setup.sh
     mode: '0755'
@@ -9,7 +9,7 @@
     - setup
 
 - name: Run NodeJS setup script
-  command: /tmp/nodejs_setup.sh
+  ansible.builtin.command: /tmp/nodejs_setup.sh
   args:
     creates: /etc/apt/sources.list.d/nodesource.list
   tags:
@@ -17,29 +17,29 @@
     - setup
 
 - name: Install Node.js
-  apt:
+  ansible.builtin.apt:
     name: nodejs
     state: present
-    update_cache: yes
+    update_cache: true
   tags:
     - nodejs
     - packages
 
 - name: Install PM2 globally
-  npm:
+  community.general.npm:
     name: pm2
-    global: yes
+    global: true
     state: present
   tags:
     - nodejs
     - pm2
 
 - name: Create application directory
-  file:
-    path: "{{ app_dir }}"
+  ansible.builtin.file:
+    path: "{{ nodejs_app_dir }}"
     state: directory
-    owner: "{{ app_user }}"
-    group: "{{ app_user }}"
+    owner: "{{ common_app_user }}"
+    group: "{{ common_app_user }}"
     mode: '0755'
   tags:
     - nodejs

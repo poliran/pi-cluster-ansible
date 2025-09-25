@@ -1,14 +1,14 @@
 ---
 - name: Update apt cache
-  apt:
-    update_cache: yes
+  ansible.builtin.apt:
+    update_cache: true
     cache_valid_time: 3600
   tags:
     - common
     - apt
 
 - name: Install essential packages
-  apt:
+  ansible.builtin.apt:
     name:
       - curl
       - wget
@@ -22,40 +22,42 @@
     - packages
 
 - name: Configure swap
+  notify: restart swap
+  tags:
+    - common
+    - swap
   block:
     - name: Stop swap
-      command: /usr/sbin/dphys-swapfile swapoff
-      ignore_errors: yes
+      ansible.builtin.command: /usr/sbin/dphys-swapfile swapoff
+      failed_when: false
+      changed_when: false
 
     - name: Set swap size
-      lineinfile:
+      ansible.builtin.lineinfile:
         path: /etc/dphys-swapfile
         regexp: '^CONF_SWAPSIZE='
         line: 'CONF_SWAPSIZE=1024'
 
     - name: Setup and start swap
-      shell: |
+      ansible.builtin.shell: |
         /usr/sbin/dphys-swapfile setup
         /usr/sbin/dphys-swapfile swapon
-      ignore_errors: yes
-  notify: restart swap
-  tags:
-    - common
-    - swap
+      failed_when: false
+      changed_when: false
 
 - name: Set timezone
-  timezone:
+  community.general.timezone:
     name: Asia/Manila
   tags:
     - common
     - timezone
 
 - name: Create application user
-  user:
-    name: "{{ app_user }}"
+  ansible.builtin.user:
+    name: "{{ common_app_user }}"
     shell: /bin/bash
     groups: sudo
-    append: yes
+    append: true
   tags:
     - common
     - users

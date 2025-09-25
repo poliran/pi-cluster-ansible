@@ -1,10 +1,10 @@
 ---
 # Common role handlers
 - name: restart swap
-  systemd:
+  ansible.builtin.systemd:
     name: dphys-swapfile
     state: restarted
 
 - name: reload systemd
-  systemd:
-    daemon_reload: yes
+  ansible.builtin.systemd:
+    daemon_reload: true

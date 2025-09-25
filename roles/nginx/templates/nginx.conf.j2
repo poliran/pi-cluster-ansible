@@ -1,21 +1,23 @@
 upstream backend {
 {% for host in groups['web_servers'] %}
-    server {{ hostvars[host]['ansible_host'] }}:{{ app_port }};
+    server {{ hostvars[host]['ansible_host'] }}:{{ nginx_app_port }};
 {% endfor %}
 }
 
 server {
     listen 80;
     server_name _;
+    root /var/www/html;
+    index index.html;
 
     # Security headers
     add_header X-Frame-Options "SAMEORIGIN" always;
     add_header X-XSS-Protection "1; mode=block" always;
     add_header X-Content-Type-Options "nosniff" always;
 
-    # API proxy
-    location /api {
-        proxy_pass http://backend;
+    # API proxy to backend servers
+    location /api/ {
+        proxy_pass http://backend/;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
@@ -27,17 +29,16 @@ server {
         proxy_read_timeout 30s;
     }
 
-    # Static files (if serving Angular app)
+    # Serve Angular static files
     location / {
-        root /var/www/html/dist;
         try_files $uri $uri/ /index.html;
         expires 1d;
         add_header Cache-Control "public, immutable";
     }
 
-    # Health check endpoint
-    location /health {
-        proxy_pass http://backend/api/health;
-        access_log off;
+    # Handle Angular routing
+    location ~* \.(js|css|png|jpg|jpeg|gif|ico|svg)$ {
+        expires 1y;
+        add_header Cache-Control "public, immutable";
     }
 }

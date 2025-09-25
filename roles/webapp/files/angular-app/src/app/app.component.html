@@ -1,0 +1,39 @@
+<div class="container">
+  <div class="header">
+    <h1>🥧 Raspberry Pi Cluster Dashboard</h1>
+    <p>Real-time monitoring of your Pi cluster infrastructure</p>
+    <button class="refresh-btn" (click)="refresh()" [disabled]="loading">
+      {{ loading ? 'Loading...' : 'Refresh Status' }}
+    </button>
+    <p><small>Last updated: {{ lastUpdate | date:'medium' }}</small></p>
+  </div>
+
+  <div class="cluster-grid">
+    <div class="server-card" *ngFor="let server of getUniqueServers()">
+      <h3>Server: {{ server.server }}</h3>
+      <p><strong>Status:</strong> 
+        <span [class]="server.database === 'connected' ? 'status-online' : 'status-offline'">
+          {{ server.database === 'connected' ? 'Online' : 'Offline' }}
+        </span>
+      </p>
+      <p><strong>Uptime:</strong> {{ server.uptime }}</p>
+      <p><strong>Database:</strong> {{ server.database }}</p>
+      <p><strong>Last Response:</strong> {{ server.timestamp | date:'short' }}</p>
+      <p><em>{{ server.message }}</em></p>
+    </div>
+  </div>
+
+  <div *ngIf="servers.length === 0 && !loading" style="text-align: center; color: #666;">
+    <p>No server responses received. Check your backend services.</p>
+  </div>
+
+  <div style="margin-top: 30px; padding: 20px; background: #e9ecef; border-radius: 5px;">
+    <h4>Load Balancing Test Results</h4>
+    <p>Total requests made: {{ servers.length }}</p>
+    <div *ngFor="let server of getUniqueServers()">
+      <p><strong>{{ server.server }}:</strong> 
+        {{ servers.filter(s => s.server === server.server).length }} requests
+      </p>
+    </div>
+  </div>
+</div>

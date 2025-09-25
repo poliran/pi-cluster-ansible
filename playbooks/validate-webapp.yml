@@ -1,0 +1,39 @@
+---
+- name: Validate web applications
+  hosts: web_servers
+  vars:
+    webapp_app_user: "mpi"
+    webapp_app_port: 3000
+  tasks:
+    - name: Check PM2 process status
+      become: true
+      become_user: "{{ webapp_app_user }}"
+      ansible.builtin.shell: pm2 list
+      register: pm2_status
+      changed_when: false
+      
+    - name: Display PM2 status
+      ansible.builtin.debug:
+        msg: "{{ inventory_hostname }}: {{ pm2_status.stdout_lines }}"
+
+    - name: Test application health endpoint
+      ansible.builtin.uri:
+        url: "http://localhost:{{ webapp_app_port }}/health"
+        method: GET
+        return_content: true
+      register: health_check
+      
+    - name: Display health check result
+      ansible.builtin.debug:
+        msg: "{{ inventory_hostname }}: {{ health_check.json }}"
+
+    - name: Test main application endpoint
+      ansible.builtin.uri:
+        url: "http://localhost:{{ webapp_app_port }}/"
+        method: GET
+        return_content: true
+      register: app_response
+      
+    - name: Display application response
+      ansible.builtin.debug:
+        msg: "{{ inventory_hostname }}: {{ app_response.json }}"
