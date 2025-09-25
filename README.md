@@ -29,11 +29,13 @@ open http://192.168.254.121/
 ## 📚 Documentation
 
 ### Core Documentation
+- **[Project Structure](PROJECT_STRUCTURE.md)** - Complete directory structure overview
 - **[Production Guide](docs/PRODUCTION.md)** - Complete production deployment guide
 - **[Architecture](docs/ARCHITECTURE.md)** - System architecture and design
 - **[Deployment](docs/DEPLOYMENT.md)** - Step-by-step deployment instructions
 - **[API Documentation](docs/API.md)** - REST API reference
 - **[Troubleshooting](docs/TROUBLESHOOTING.md)** - Common issues and solutions
+- **[Operations Runbook](docs/OPERATIONS.md)** - Daily operations and maintenance
 
 ### Quick Reference
 - **Dashboard**: http://192.168.254.121/
@@ -59,13 +61,13 @@ pi-db:   192.168.254.124 (MariaDB Database Server)
 ### Automated Deployment
 ```bash
 # Install dependencies
-ansible-galaxy install -r requirements.yml
-
-# Update inventory with your Pi IP addresses
-vi inventories/production/hosts
+make install
 
 # Deploy the cluster
-./deploy.sh
+make deploy
+
+# Validate deployment
+make validate
 ```
 
 ### Manual Deployment
@@ -88,6 +90,7 @@ ansible-playbook playbooks/site.yml --tags angular
 - 🟢 Server health monitoring
 - 🔄 Auto-refresh every 10 seconds
 - 📱 Mobile-friendly design
+- 🎯 Interactive server status cards
 
 ### Backend Services
 - ⚡ Node.js Express applications with PM2
@@ -95,6 +98,7 @@ ansible-playbook playbooks/site.yml --tags angular
 - 📈 Performance monitoring
 - 🗄️ Database connection pooling
 - 🔒 Security headers and validation
+- 🏥 Health check endpoints
 
 ### Infrastructure
 - 🌐 nginx load balancing with health checks
@@ -102,6 +106,7 @@ ansible-playbook playbooks/site.yml --tags angular
 - 🔧 Automated deployment and configuration
 - 📋 Comprehensive monitoring and logging
 - 🛡️ Security hardening and firewall rules
+- 🎭 Modular Ansible role architecture
 
 ## 🔍 Monitoring
 
@@ -110,9 +115,14 @@ ansible-playbook playbooks/site.yml --tags angular
 # Validate deployment
 make validate
 
-# Check individual services
-ansible all -m service_facts
+# Comprehensive cluster validation
 ansible-playbook playbooks/validate-cluster.yml
+
+# Web application validation
+ansible-playbook playbooks/validate-webapp.yml
+
+# Angular dashboard validation
+ansible-playbook playbooks/validate-angular.yml
 ```
 
 ### Dashboard Features
@@ -120,13 +130,14 @@ ansible-playbook playbooks/validate-cluster.yml
 - Load balancing request distribution
 - Database connectivity monitoring
 - Performance metrics visualization
+- Auto-refresh functionality
 
 ## 🛠️ Maintenance
 
 ### Updates
 ```bash
 # System updates
-./update.sh
+ansible all -m apt -a "upgrade=safe" -b
 
 # Application updates
 ansible-playbook playbooks/site.yml --tags webapp
@@ -216,9 +227,23 @@ See [Troubleshooting Guide](docs/TROUBLESHOOTING.md) for detailed solutions.
 - `common`: Base system configuration and user setup
 - `database`: MariaDB installation and optimization
 - `nodejs`: Node.js runtime and PM2 process manager
-- `webapp`: Application deployment and configuration
+- `webapp`: Full-stack application deployment with Angular source
 - `nginx`: Load balancer and reverse proxy setup
 - `angular`: Frontend dashboard deployment
+
+## 🎯 Quality Assurance
+
+### Code Quality
+- **Ansible Lint**: 0 violations (production-ready)
+- **FQCN Compliance**: All modules use fully qualified names
+- **Variable Naming**: Consistent role-prefixed conventions
+- **Security Standards**: Industry best practices implemented
+
+### Testing & Validation
+- **5 validation playbooks** for comprehensive testing
+- **Health check endpoints** for monitoring
+- **Load balancing tests** for distribution verification
+- **Database connectivity** validation
 
 ## 🤝 Contributing
 

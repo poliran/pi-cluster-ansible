@@ -40,7 +40,7 @@ Returns server health status.
 ### Server Status
 
 #### GET /
-Returns comprehensive server information.
+Returns comprehensive server information including database connectivity.
 
 **Response:**
 ```json
@@ -55,9 +55,9 @@ Returns comprehensive server information.
 
 **Fields:**
 - `message` - Application identifier
-- `server` - Hostname of responding server
+- `server` - Hostname of responding server (k2 or k3)
 - `uptime` - Process uptime in seconds
-- `database` - Database connection status
+- `database` - Database connection status ("connected" or "disconnected")
 - `timestamp` - Response timestamp (ISO 8601)
 
 **Status Codes:**
@@ -72,6 +72,16 @@ The API is load-balanced across multiple backend servers:
 - `pi-web2` (k3): 192.168.254.123:3000
 
 nginx uses round-robin distribution by default.
+
+### Load Balancing Test
+```bash
+# Test load distribution
+for i in {1..10}; do
+  curl -s http://192.168.254.121/api/ | jq -r .server
+done | sort | uniq -c
+```
+
+Expected output shows requests distributed between k2 and k3.
 
 ## Error Handling
 
@@ -100,16 +110,16 @@ Current limits (recommended for production):
 
 ## Monitoring
 
-### Metrics Endpoints
-```bash
-# Process metrics
-GET /metrics
+### Real-time Monitoring
+The Angular dashboard provides real-time monitoring by making multiple API calls:
 
-# Database metrics  
-GET /db/metrics
-
-# System metrics
-GET /system/metrics
+```javascript
+// Dashboard makes 10 requests to test load balancing
+for (let i = 0; i < 10; i++) {
+    const response = await fetch('/api/');
+    const data = await response.json();
+    servers.push(data);
+}
 ```
 
 ### Health Monitoring
@@ -162,10 +172,10 @@ curl http://localhost:3000/
 # Load balancer test
 for i in {1..10}; do
   curl -s http://192.168.254.121/api/ | jq .server
-done
+done | sort | uniq -c
 ```
 
-## Database Schema
+## Database Integration
 
 ### Connection Configuration
 ```javascript
@@ -178,6 +188,14 @@ const dbConfig = {
   acquireTimeout: 60000,
   timeout: 60000
 };
+```
+
+### Database Testing
+The API performs a simple connectivity test:
+```javascript
+const connection = await mysql.createConnection(dbConfig);
+await connection.execute('SELECT 1');
+await connection.end();
 ```
 
 ### Tables
@@ -207,6 +225,7 @@ CREATE TABLE api_requests (
 - Basic input validation
 - CORS headers configured
 - Security headers via nginx
+- Database connection pooling
 
 ### Production Recommendations
 ```javascript
@@ -224,10 +243,11 @@ app.use(rateLimit({
 ## Performance
 
 ### Current Metrics
-- Response time: < 50ms average
-- Throughput: 1000+ requests/second
-- Memory usage: ~60MB per process
-- CPU usage: < 5% under normal load
+- **Response Time**: < 50ms average
+- **Throughput**: 1000+ requests/second
+- **Memory Usage**: ~60MB per process
+- **CPU Usage**: < 5% under normal load
+- **Database Connections**: Pooled with 10 max connections
 
 ### Optimization
 ```javascript
@@ -236,8 +256,10 @@ module.exports = {
   apps: [{
     name: 'pi-cluster-app',
     script: 'app.js',
-    instances: 'max',
-    exec_mode: 'cluster'
+    instances: 1,
+    exec_mode: 'fork',
+    autorestart: true,
+    max_memory_restart: '400M'
   }]
 };
 ```
@@ -258,31 +280,69 @@ DB_NAME=webapp_db
 ```javascript
 module.exports = {
   apps: [{
-    name: 'pi-cluster-app',
+    name: 'mpi-cluster-app',
     script: 'app.js',
     instances: 1,
     autorestart: true,
     watch: false,
     max_memory_restart: '400M',
     env: {
-      NODE_ENV: 'production'
+      NODE_ENV: 'production',
+      PORT: 3000,
+      DB_HOST: '192.168.254.124',
+      DB_NAME: 'webapp_db',
+      DB_USER: 'webapp_user',
+      DB_PASSWORD: 'secure_password'
     }
   }]
 };
 ```
 
+## Angular Dashboard Integration
+
+### Dashboard API Calls
+The Angular dashboard makes multiple API calls to demonstrate load balancing:
+
+```javascript
+async function loadClusterStatus() {
+    servers = [];
+    
+    // Make multiple requests to test load balancing
+    for (let i = 0; i < 10; i++) {
+        try {
+            const response = await fetch('/api/');
+            const data = await response.json();
+            servers.push(data);
+        } catch (error) {
+            console.error('Error fetching server status:', error);
+        }
+    }
+    
+    displayResults();
+}
+```
+
+### Real-time Updates
+- Auto-refresh every 10 seconds
+- Visual load balancing statistics
+- Server health indicators
+- Database connectivity status
+
 ## Changelog
 
 ### v1.0.0 (Current)
 - Basic health check endpoint
-- Server status endpoint
-- Database connectivity testing
+- Server status endpoint with database connectivity
 - Load balancing support
-- Error handling
+- Error handling with proper HTTP status codes
+- PM2 process management integration
+- MariaDB database integration
+- Real-time Angular dashboard integration
 
 ### Planned Features
 - Authentication system
-- Metrics collection
+- Metrics collection endpoints
 - Real-time WebSocket updates
 - Cluster management endpoints
-- Performance monitoring
+- Performance monitoring APIs
+- Historical data storage
