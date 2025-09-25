@@ -1,0 +1,5 @@
+---
+# Default variables for nodejs role
+nodejs_version: "18"
+app_user: "mpi"
+app_dir: "/opt/webapp"

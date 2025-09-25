@@ -1,0 +1,10 @@
+---
+# NodeJS role handlers
+- name: restart nodejs
+  systemd:
+    name: nodejs
+    state: restarted
+
+- name: reload systemd
+  systemd:
+    daemon_reload: yes

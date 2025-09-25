@@ -1,0 +1,14 @@
+---
+galaxy_info:
+  author: keith
+  description: Common base configuration for Raspberry Pi cluster nodes
+  license: MIT
+  min_ansible_version: "2.12"
+  platforms:
+    - name: Debian
+      versions:
+        - bullseye
+        - bookworm
+dependencies: []
+
+

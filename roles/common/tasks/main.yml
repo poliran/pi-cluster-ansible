@@ -1,0 +1,61 @@
+---
+- name: Update apt cache
+  apt:
+    update_cache: yes
+    cache_valid_time: 3600
+  tags:
+    - common
+    - apt
+
+- name: Install essential packages
+  apt:
+    name:
+      - curl
+      - wget
+      - git
+      - htop
+      - vim
+      - unzip
+    state: present
+  tags:
+    - common
+    - packages
+
+- name: Configure swap
+  block:
+    - name: Stop swap
+      command: /usr/sbin/dphys-swapfile swapoff
+      ignore_errors: yes
+
+    - name: Set swap size
+      lineinfile:
+        path: /etc/dphys-swapfile
+        regexp: '^CONF_SWAPSIZE='
+        line: 'CONF_SWAPSIZE=1024'
+
+    - name: Setup and start swap
+      shell: |
+        /usr/sbin/dphys-swapfile setup
+        /usr/sbin/dphys-swapfile swapon
+      ignore_errors: yes
+  notify: restart swap
+  tags:
+    - common
+    - swap
+
+- name: Set timezone
+  timezone:
+    name: Asia/Manila
+  tags:
+    - common
+    - timezone
+
+- name: Create application user
+  user:
+    name: "{{ app_user }}"
+    shell: /bin/bash
+    groups: sudo
+    append: yes
+  tags:
+    - common
+    - users

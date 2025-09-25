@@ -1,0 +1,6 @@
+---
+# Default variables for nginx role
+app_name: "mpi-cluster-app"
+app_port: 3000
+nginx_worker_processes: 1
+nginx_worker_connections: 512

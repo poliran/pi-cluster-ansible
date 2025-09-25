@@ -1,0 +1,119 @@
+---
+- name: Create placeholder application
+  file:
+    path: "{{ app_dir }}"
+    state: directory
+    owner: "{{ app_user }}"
+    group: "{{ app_user }}"
+    mode: '0755'
+  tags:
+    - webapp
+    - app
+
+- name: Create package.json
+  copy:
+    content: |
+      {
+        "name": "{{ app_name }}",
+        "version": "1.0.0",
+        "description": "MPI Cluster Application",
+        "main": "app.js",
+        "scripts": {
+          "start": "node app.js"
+        },
+        "dependencies": {
+          "express": "^4.18.2"
+        }
+      }
+    dest: "{{ app_dir }}/package.json"
+    owner: "{{ app_user }}"
+    group: "{{ app_user }}"
+    mode: '0644'
+  tags:
+    - webapp
+    - app
+
+- name: Create application file
+  copy:
+    content: |
+      const express = require('express');
+      const app = express();
+      const port = process.env.PORT || {{ app_port }};
+
+      app.get('/', (req, res) => {
+        res.json({
+          message: 'MPI Cluster Application',
+          status: 'running',
+          port: port,
+          timestamp: new Date().toISOString()
+        });
+      });
+
+      app.get('/health', (req, res) => {
+        res.json({ status: 'healthy' });
+      });
+
+      app.listen(port, '0.0.0.0', () => {
+        console.log(`Server running on port ${port}`);
+      });
+    dest: "{{ app_dir }}/app.js"
+    owner: "{{ app_user }}"
+    group: "{{ app_user }}"
+    mode: '0755'
+  tags:
+    - webapp
+    - app
+
+- name: Install Node.js dependencies
+  npm:
+    path: "{{ app_dir }}"
+    production: yes
+  become_user: "{{ app_user }}"
+  tags:
+    - webapp
+    - dependencies
+
+- name: Create PM2 ecosystem file
+  template:
+    src: ecosystem.config.js.j2
+    dest: "{{ app_dir }}/ecosystem.config.js"
+    owner: "{{ app_user }}"
+    group: "{{ app_user }}"
+  notify: restart webapp
+  tags:
+    - webapp
+    - pm2
+
+- name: Create application environment file
+  template:
+    src: .env.j2
+    dest: "{{ app_dir }}/.env"
+    owner: "{{ app_user }}"
+    group: "{{ app_user }}"
+    mode: '0600'
+  notify: restart webapp
+  tags:
+    - webapp
+    - config
+
+- name: Start application with PM2
+  become_user: "{{ app_user }}"
+  shell: |
+    cd {{ app_dir }}
+    pm2 delete {{ app_name }} || true
+    pm2 start ecosystem.config.js
+    pm2 save
+  environment:
+    NODE_OPTIONS: "--max-old-space-size={{ max_old_space_size }}"
+  tags:
+    - webapp
+    - pm2
+
+- name: Setup PM2 startup script
+  shell: |
+    env PATH=$PATH:/usr/bin pm2 startup systemd -u {{ app_user }} --hp /home/{{ app_user }}
+  args:
+    creates: /etc/systemd/system/pm2-{{ app_user }}.service
+  tags:
+    - webapp
+    - pm2

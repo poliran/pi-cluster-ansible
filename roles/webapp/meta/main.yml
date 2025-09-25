@@ -1,0 +1,16 @@
+---
+galaxy_info:
+  author: keith
+  description: Deploy sample Node.js web application under PM2
+  license: MIT
+  min_ansible_version: "2.12"
+  platforms:
+    - name: Debian
+      versions:
+        - bullseye
+        - bookworm
+dependencies:
+  - role: nodejs
+  - role: nginx
+
+

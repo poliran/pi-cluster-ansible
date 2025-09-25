@@ -1,0 +1,12 @@
+---
+exclude_paths:
+  - .cache/
+  - logs/
+  - .github/
+
+skip_list:
+  - yaml[line-length]
+  - name[casing]
+
+use_default_rules: true
+parseable: true

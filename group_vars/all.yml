@@ -1,0 +1,20 @@
+---
+# Application settings
+app_name: "mpi-cluster-app"
+app_user: "mpi"
+app_dir: "/opt/webapp"
+node_version: "18"
+
+# Database settings
+db_name: "webapp_db"
+db_user: "webapp_user"
+db_password: "6XtUTusvxWoARQh"
+db_host: "192.168.254.124"
+
+# Git repository
+git_repo: "https://github.com/yourusername/your-repo.git"
+git_branch: "main"
+
+# Nginx settings
+nginx_worker_processes: 1
+nginx_worker_connections: 512

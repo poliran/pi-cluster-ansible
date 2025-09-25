@@ -1,0 +1,13 @@
+---
+mysql_root_password: "6XtUTusvxWoARQh"
+mysql_databases:
+  - name: "{{ db_name }}"
+mysql_users:
+  - name: "{{ db_user }}"
+    password: "{{ db_password }}"
+    priv: "{{ db_name }}.*:ALL"
+    host: "192.168.254.%"
+
+# SSD mount point
+db_mount_point: "/mnt/database"
+mysql_datadir: "{{ db_mount_point }}/mysql"

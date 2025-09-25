@@ -1,0 +1,4 @@
+---
+nodejs_version: "{{ node_version }}"
+app_port: 3000
+max_old_space_size: 400

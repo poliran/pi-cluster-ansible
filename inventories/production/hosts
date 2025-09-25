@@ -1,0 +1,14 @@
+[load_balancers]
+pi-lb ansible_host=192.168.254.121
+
+[web_servers]
+pi-web1 ansible_host=192.168.254.122
+pi-web2 ansible_host=192.168.254.123
+
+[database_servers]
+pi-db ansible_host=192.168.254.124
+
+[all:vars]
+ansible_user=mpi
+ansible_ssh_private_key_file=~/.ssh/id_rsa
+ansible_python_interpreter=/usr/bin/python3

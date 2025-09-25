@@ -1,0 +1,15 @@
+---
+galaxy_info:
+  author: keith
+  description: MariaDB setup and configuration for cluster database nodes
+  license: MIT
+  min_ansible_version: "2.12"
+  platforms:
+    - name: Debian
+      versions:
+        - bullseye
+        - bookworm
+dependencies:
+  - role: common
+
+

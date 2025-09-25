@@ -1,0 +1,13 @@
+---
+# Default variables for webapp role
+app_user: "mpi"
+app_dir: "/opt/webapp"
+app_name: "mpi-cluster-app"
+app_port: 3000
+max_old_space_size: 400
+git_repo: "https://github.com/yourusername/your-repo.git"
+git_branch: "main"
+db_host: "192.168.254.124"
+db_name: "webapp_db"
+db_user: "webapp_user"
+db_password: "6XtUTusvxWoARQh"

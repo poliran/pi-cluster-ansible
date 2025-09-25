@@ -1,0 +1,85 @@
+---
+- name: Install MariaDB
+  apt:
+    name:
+      - mariadb-server
+      - mariadb-client
+      - python3-pymysql
+    state: present
+  tags:
+    - database
+    - packages
+
+- name: Start MariaDB service
+  systemd:
+    name: mariadb
+    state: started
+    enabled: yes
+  tags:
+    - database
+    - service
+
+- name: Set MariaDB root password
+  mysql_user:
+    name: root
+    password: "{{ mysql_root_password }}"
+    login_unix_socket: /var/run/mysqld/mysqld.sock
+    state: present
+  tags:
+    - database
+    - security
+
+- name: Create MariaDB configuration file
+  template:
+    src: my.cnf.j2
+    dest: /root/.my.cnf
+    owner: root
+    group: root
+    mode: '0600'
+  tags:
+    - database
+    - config
+
+- name: Create application database
+  mysql_db:
+    name: "{{ db_name }}"
+    state: present
+    login_user: root
+    login_password: "{{ mysql_root_password }}"
+    login_unix_socket: /var/run/mysqld/mysqld.sock
+  tags:
+    - database
+    - schema
+
+- name: Create application database user
+  mysql_user:
+    name: "{{ db_user }}"
+    password: "{{ db_password }}"
+    priv: "{{ db_name }}.*:ALL"
+    host: "192.168.254.%"
+    state: present
+    login_user: root
+    login_password: "{{ mysql_root_password }}"
+    login_unix_socket: /var/run/mysqld/mysqld.sock
+  tags:
+    - database
+    - users
+
+- name: Configure MariaDB for remote access
+  lineinfile:
+    path: /etc/mysql/mariadb.conf.d/50-server.cnf
+    regexp: '^bind-address'
+    line: 'bind-address = 0.0.0.0'
+  notify: restart mariadb
+  tags:
+    - database
+    - config
+
+- name: Configure MariaDB for SSD optimization
+  template:
+    src: ssd-optimization.cnf.j2
+    dest: /etc/mysql/mariadb.conf.d/60-ssd.cnf
+  notify: restart mariadb
+  tags:
+    - database
+    - performance

@@ -1,0 +1,15 @@
+---
+galaxy_info:
+  author: keith
+  description: Nginx installation and vhost configuration for web servers
+  license: MIT
+  min_ansible_version: "2.12"
+  platforms:
+    - name: Debian
+      versions:
+        - bullseye
+        - bookworm
+dependencies:
+  - role: common
+
+

@@ -1,0 +1,3 @@
+---
+# Default variables for common role
+app_user: "mpi"

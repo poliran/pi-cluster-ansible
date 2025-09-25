@@ -1,0 +1,10 @@
+---
+# Common role handlers
+- name: restart swap
+  systemd:
+    name: dphys-swapfile
+    state: restarted
+
+- name: reload systemd
+  systemd:
+    daemon_reload: yes

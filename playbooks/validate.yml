@@ -1,0 +1,38 @@
+---
+- name: Validate cluster deployment
+  hosts: all
+  gather_facts: yes
+  tasks:
+    - name: Check system uptime
+      command: uptime
+      register: uptime_result
+      
+    - name: Display uptime
+      debug:
+        msg: "{{ inventory_hostname }}: {{ uptime_result.stdout }}"
+
+- name: Validate web servers
+  hosts: web_servers
+  tasks:
+    - name: Check Node.js service
+      service:
+        name: nodejs
+        state: started
+      check_mode: yes
+
+- name: Validate database server
+  hosts: database_servers
+  tasks:
+    - name: Check database connectivity
+      wait_for:
+        port: 5432
+        timeout: 10
+
+- name: Validate load balancer
+  hosts: load_balancers
+  tasks:
+    - name: Check nginx service
+      service:
+        name: nginx
+        state: started
+      check_mode: yes

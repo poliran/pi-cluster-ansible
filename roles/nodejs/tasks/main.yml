@@ -1,0 +1,46 @@
+---
+- name: Download NodeJS setup script
+  get_url:
+    url: "https://deb.nodesource.com/setup_{{ nodejs_version }}.x"
+    dest: /tmp/nodejs_setup.sh
+    mode: '0755'
+  tags:
+    - nodejs
+    - setup
+
+- name: Run NodeJS setup script
+  command: /tmp/nodejs_setup.sh
+  args:
+    creates: /etc/apt/sources.list.d/nodesource.list
+  tags:
+    - nodejs
+    - setup
+
+- name: Install Node.js
+  apt:
+    name: nodejs
+    state: present
+    update_cache: yes
+  tags:
+    - nodejs
+    - packages
+
+- name: Install PM2 globally
+  npm:
+    name: pm2
+    global: yes
+    state: present
+  tags:
+    - nodejs
+    - pm2
+
+- name: Create application directory
+  file:
+    path: "{{ app_dir }}"
+    state: directory
+    owner: "{{ app_user }}"
+    group: "{{ app_user }}"
+    mode: '0755'
+  tags:
+    - nodejs
+    - app
