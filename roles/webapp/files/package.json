@@ -1,7 +1,7 @@
 {
   "name": "pi-cluster-webapp",
-  "version": "1.0.0",
-  "description": "Simple web application for Pi cluster",
+  "version": "1.1.0",
+  "description": "Secure web application for Pi cluster with JWT and rate limiting",
   "main": "app.js",
   "scripts": {
     "start": "node app.js",
@@ -9,7 +9,12 @@
   },
   "dependencies": {
     "express": "^4.18.2",
-    "mysql2": "^3.6.0"
+    "mysql2": "^3.6.0",
+    "jsonwebtoken": "^9.0.2",
+    "express-rate-limit": "^7.1.5",
+    "bcryptjs": "^2.4.3",
+    "helmet": "^7.1.0",
+    "cors": "^2.8.5"
   },
   "engines": {
     "node": ">=18.0.0"

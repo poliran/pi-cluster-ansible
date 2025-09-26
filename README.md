@@ -37,6 +37,7 @@ open http://192.168.254.121/
 - **[Architecture](docs/ARCHITECTURE.md)** - System architecture and design
 - **[Deployment](docs/DEPLOYMENT.md)** - Step-by-step deployment instructions
 - **[Vault Usage](docs/VAULT.md)** - Ansible Vault secrets management
+- **[Security](docs/SECURITY.md)** - JWT, API keys, and rate limiting
 - **[API Documentation](docs/API.md)** - REST API reference
 - **[Troubleshooting](docs/TROUBLESHOOTING.md)** - Common issues and solutions
 - **[Operations Runbook](docs/OPERATIONS.md)** - Daily operations and maintenance
