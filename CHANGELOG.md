@@ -5,6 +5,32 @@ All notable changes to the Pi Cluster Ansible project will be documented in this
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.0] - 2024-09-26
+
+### Added
+- **Security Features Deployed**: JWT tokens, API keys, and rate limiting
+  - JWT authentication with 1-hour expiration
+  - API key protection for all endpoints
+  - Rate limiting (100 req/15min general, 5 req/15min auth)
+  - Security headers with Helmet.js
+
+### Fixed
+- **Deployment Issues Resolved**
+  - Fixed Ansible vault variable loading
+  - Configured vault password file for automated deployments
+  - Resolved template variable resolution issues
+
+### Changed
+- Updated API endpoints to use port 3000 directly
+- Enhanced security documentation with test examples
+- Simplified deployment process with vault password file
+
+### Tested
+- ✅ All security endpoints working
+- ✅ JWT authentication functional
+- ✅ API key validation active
+- ✅ Rate limiting operational
+
 ## [1.1.0] - 2024-09-26
 
 ### Added

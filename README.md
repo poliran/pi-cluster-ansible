@@ -44,8 +44,9 @@ open http://192.168.254.121/
 
 ### Quick Reference
 - **Dashboard**: http://192.168.254.121/
-- **API Endpoint**: http://192.168.254.121/api/
-- **Health Check**: http://192.168.254.121/api/health
+- **API Endpoint**: http://192.168.254.122:3000/api/
+- **Health Check**: http://192.168.254.122:3000/health
+- **Admin Login**: POST http://192.168.254.122:3000/api/auth/login
 
 ## 🏗️ Infrastructure
 
@@ -68,7 +69,7 @@ pi-db:   192.168.254.124 (MariaDB Database Server)
 # Install dependencies
 make install
 
-# Deploy the cluster (prompts for vault password)
+# Deploy the cluster (uses vault password file)
 make deploy
 
 # Validate deployment
@@ -77,14 +78,14 @@ make validate
 
 ### Manual Deployment
 ```bash
-# Deploy all services (with vault password)
-ansible-playbook playbooks/site.yml --ask-vault-pass
+# Deploy all services (uses vault password file)
+ansible-playbook playbooks/site.yml
 
 # Deploy specific components
-ansible-playbook playbooks/site.yml --tags database --ask-vault-pass
-ansible-playbook playbooks/site.yml --tags webapp --ask-vault-pass
-ansible-playbook playbooks/site.yml --tags nginx --ask-vault-pass
-ansible-playbook playbooks/site.yml --tags angular --ask-vault-pass
+ansible-playbook playbooks/site.yml --tags database
+ansible-playbook playbooks/site.yml --tags webapp
+ansible-playbook playbooks/site.yml --tags nginx
+ansible-playbook playbooks/site.yml --tags angular
 ```
 
 ## 📊 Features
@@ -102,7 +103,9 @@ ansible-playbook playbooks/site.yml --tags angular --ask-vault-pass
 - 🔄 Automatic failover and restart
 - 📈 Performance monitoring
 - 🗄️ Database connection pooling
-- 🔒 Security headers and validation
+- 🔒 JWT authentication with 1-hour expiration
+- 🔑 API key protection for endpoints
+- 🛡️ Rate limiting (100 req/15min, 5 auth/15min)
 - 🏥 Health check endpoints
 
 ### Infrastructure
