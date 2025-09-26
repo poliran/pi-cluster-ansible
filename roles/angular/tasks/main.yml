@@ -41,7 +41,7 @@
                   <button class="refresh-btn" onclick="loadClusterStatus()">Refresh Status</button>
                   <p><small>Last updated: <span id="lastUpdate">Never</span></small></p>
               </div>
-              
+
               <div id="loading" class="loading">Loading cluster status...</div>
               <div id="clusterGrid" class="cluster-grid" style="display: none;"></div>
               <div id="loadBalanceStats" style="margin-top: 30px; padding: 20px; background: #e9ecef; border-radius: 5px; display: none;"></div>
@@ -49,14 +49,14 @@
 
           <script>
               let servers = [];
-              
+
               async function loadClusterStatus() {
                   document.getElementById('loading').style.display = 'block';
                   document.getElementById('clusterGrid').style.display = 'none';
                   document.getElementById('loadBalanceStats').style.display = 'none';
-                  
+
                   servers = [];
-                  
+
                   // Make multiple requests to test load balancing
                   for (let i = 0; i < 10; i++) {
                       try {
@@ -67,39 +67,39 @@
                           console.error('Error fetching server status:', error);
                       }
                   }
-                  
+
                   displayResults();
                   document.getElementById('lastUpdate').textContent = new Date().toLocaleString();
               }
-              
+
               function displayResults() {
                   document.getElementById('loading').style.display = 'none';
-                  
+
                   if (servers.length === 0) {
                       document.getElementById('clusterGrid').innerHTML = '<p style="text-align: center; color: #666;">No server responses received. Check your backend services.</p>';
                       document.getElementById('clusterGrid').style.display = 'block';
                       return;
                   }
-                  
+
                   // Get unique servers
                   const uniqueServers = new Map();
                   servers.forEach(server => {
-                      if (!uniqueServers.has(server.server) || 
+                      if (!uniqueServers.has(server.server) ||
                           new Date(server.timestamp) > new Date(uniqueServers.get(server.server).timestamp)) {
                           uniqueServers.set(server.server, server);
                       }
                   });
-                  
+
                   // Display server cards
                   const grid = document.getElementById('clusterGrid');
                   grid.innerHTML = '';
-                  
+
                   uniqueServers.forEach(server => {
                       const card = document.createElement('div');
                       card.className = 'server-card';
                       card.innerHTML = `
                           <h3>Server: ${server.server}</h3>
-                          <p><strong>Status:</strong> 
+                          <p><strong>Status:</strong>
                               <span class="${server.database === 'connected' ? 'status-online' : 'status-offline'}">
                                   ${server.database === 'connected' ? 'Online' : 'Offline'}
                               </span>
@@ -111,28 +111,28 @@
                       `;
                       grid.appendChild(card);
                   });
-                  
+
                   // Display load balancing stats
                   const stats = document.getElementById('loadBalanceStats');
                   const serverCounts = {};
                   servers.forEach(server => {
                       serverCounts[server.server] = (serverCounts[server.server] || 0) + 1;
                   });
-                  
+
                   let statsHtml = '<h4>Load Balancing Test Results</h4>';
                   statsHtml += `<p>Total requests made: ${servers.length}</p>`;
                   Object.entries(serverCounts).forEach(([serverName, count]) => {
                       statsHtml += `<p><strong>${serverName}:</strong> ${count} requests</p>`;
                   });
-                  
+
                   stats.innerHTML = statsHtml;
                   stats.style.display = 'block';
                   grid.style.display = 'grid';
               }
-              
+
               // Auto-refresh every 10 seconds
               setInterval(loadClusterStatus, 10000);
-              
+
               // Initial load
               loadClusterStatus();
           </script>

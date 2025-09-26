@@ -1,8 +1,8 @@
 ---
 # Default variables for database role
-database_mysql_root_password: "6XtUTusvxWoARQh"
+database_mysql_root_password: "{{ vault_mysql_root_password }}"
 database_db_name: "webapp_db"
 database_db_user: "webapp_user"
-database_db_password: "6XtUTusvxWoARQh"
+database_db_password: "{{ vault_db_password }}"
 database_db_mount_point: "/mnt/database"
 database_mysql_datadir: "{{ database_db_mount_point }}/mysql"

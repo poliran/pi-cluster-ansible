@@ -7,7 +7,7 @@
   tasks:
     - name: Test load balancer multiple times
       ansible.builtin.uri:
-        url: "http://{{ lb_host }}/"
+        url: "http://{{ lb_host }}/api/"
         return_content: true
       register: lb_responses
       loop: "{{ range(1, 6) | list }}"
@@ -19,7 +19,7 @@
       
     - name: Test health endpoint through load balancer
       ansible.builtin.uri:
-        url: "http://{{ lb_host }}/health"
+        url: "http://{{ lb_host }}/api/health"
         return_content: true
       register: health_response
       

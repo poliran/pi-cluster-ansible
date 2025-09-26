@@ -8,7 +8,7 @@ node_version: "18"
 # Database settings
 db_name: "webapp_db"
 db_user: "webapp_user"
-db_password: "6XtUTusvxWoARQh"
+db_password: "{{ vault_db_password }}"
 db_host: "192.168.254.124"
 
 # Git repository
