@@ -13,7 +13,10 @@ module.exports = {
       DB_HOST: '{{ webapp_db_host }}',
       DB_NAME: '{{ webapp_db_name }}',
       DB_USER: '{{ webapp_db_user }}',
-      DB_PASSWORD: '{{ webapp_db_password }}'
+      DB_PASSWORD: '{{ webapp_db_password }}',
+      JWT_SECRET: '{{ webapp_jwt_secret }}',
+      API_KEYS: '{{ webapp_api_keys | join(",") }}',
+      ADMIN_PASSWORD: '{{ webapp_admin_password }}'
     }
   }]
 };

@@ -1,8 +1,6 @@
 const express = require('express');
 const os = require('os');
-const mysql = require('mysql2/promise');
 const jwt = require('jsonwebtoken');
-const bcrypt = require('bcryptjs');
 const rateLimit = require('express-rate-limit');
 const helmet = require('helmet');
 const cors = require('cors');
@@ -17,27 +15,19 @@ app.use(express.json());
 
 // Rate limiting
 const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // limit each IP to 100 requests per windowMs
+  windowMs: 15 * 60 * 1000,
+  max: 100,
   message: { error: 'Too many requests, please try again later' }
 });
 
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 5, // limit auth attempts
+  max: 5,
   message: { error: 'Too many authentication attempts' }
 });
 
 app.use('/api/', limiter);
 app.use('/api/auth/', authLimiter);
-
-// Database connection
-const dbConfig = {
-  host: process.env.DB_HOST || 'localhost',
-  user: process.env.DB_USER || 'webapp_user',
-  password: process.env.DB_PASSWORD || 'password',
-  database: process.env.DB_NAME || 'webapp_db'
-};
 
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
 const API_KEYS = (process.env.API_KEYS || 'default-api-key').split(',');
@@ -76,7 +66,6 @@ app.get('/health', (req, res) => {
 app.post('/api/auth/login', async (req, res) => {
   const { username, password } = req.body;
   
-  // Simple auth (in production, use proper user management)
   if (username === 'admin' && password === process.env.ADMIN_PASSWORD) {
     const token = jwt.sign(
       { username, role: 'admin' },
@@ -90,32 +79,17 @@ app.post('/api/auth/login', async (req, res) => {
 });
 
 // Protected endpoints (require API key)
-app.get('/api/status', validateApiKey, async (req, res) => {
+app.get('/api/status', validateApiKey, (req, res) => {
   const hostname = os.hostname();
   const uptime = process.uptime();
   
-  try {
-    const connection = await mysql.createConnection(dbConfig);
-    await connection.execute('SELECT 1');
-    await connection.end();
-    
-    res.json({
-      message: 'Pi Cluster Web App',
-      server: hostname,
-      uptime: `${Math.floor(uptime)}s`,
-      database: 'connected',
-      timestamp: new Date().toISOString()
-    });
-  } catch (error) {
-    res.json({
-      message: 'Pi Cluster Web App',
-      server: hostname,
-      uptime: `${Math.floor(uptime)}s`,
-      database: 'disconnected',
-      error: error.message,
-      timestamp: new Date().toISOString()
-    });
-  }
+  res.json({
+    message: 'Pi Cluster Web App - Security Enabled',
+    server: hostname,
+    uptime: `${Math.floor(uptime)}s`,
+    security: 'JWT + API Keys + Rate Limiting',
+    timestamp: new Date().toISOString()
+  });
 });
 
 // Admin endpoints (require JWT)
@@ -127,35 +101,6 @@ app.get('/api/admin/metrics', validateJWT, (req, res) => {
     loadavg: os.loadavg(),
     user: req.user
   });
-});
-
-// Legacy endpoint for backward compatibility
-app.get('/', validateApiKey, async (req, res) => {
-  const hostname = os.hostname();
-  const uptime = process.uptime();
-  
-  try {
-    const connection = await mysql.createConnection(dbConfig);
-    await connection.execute('SELECT 1');
-    await connection.end();
-    
-    res.json({
-      message: 'Pi Cluster Web App',
-      server: hostname,
-      uptime: `${Math.floor(uptime)}s`,
-      database: 'connected',
-      timestamp: new Date().toISOString()
-    });
-  } catch (error) {
-    res.json({
-      message: 'Pi Cluster Web App',
-      server: hostname,
-      uptime: `${Math.floor(uptime)}s`,
-      database: 'disconnected',
-      error: error.message,
-      timestamp: new Date().toISOString()
-    });
-  }
 });
 
 app.listen(port, () => {

@@ -14,9 +14,24 @@
 - name: Setup web servers
   hosts: web_servers
   become: true
-  roles:
-    - nodejs
-    - webapp
+  tasks:
+    - name: Include vault variables
+      include_vars: ../group_vars/all/vault.yml
+    
+    - name: Deploy webapp
+      include_role:
+        name: nodejs
+      tags: nodejs
+    
+    - name: Deploy webapp with security
+      include_role:
+        name: webapp
+      vars:
+        webapp_db_password: "{{ vault_db_password }}"
+        webapp_jwt_secret: "{{ vault_jwt_secret }}"
+        webapp_admin_password: "{{ vault_admin_password }}"
+        webapp_api_keys: "{{ vault_api_keys }}"
+      tags: webapp
 
 - name: Setup load balancer
   hosts: load_balancers

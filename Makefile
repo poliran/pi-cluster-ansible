@@ -12,10 +12,10 @@ install:
 	ansible-galaxy install -r requirements.yml
 
 deploy:
-	ansible-playbook playbooks/site.yml --ask-vault-pass
+	ansible-playbook playbooks/site.yml
 
 check:
-	ansible-playbook playbooks/site.yml --syntax-check --ask-vault-pass
+	ansible-playbook playbooks/site.yml --syntax-check
 
 lint:
 	ansible-lint playbooks/site.yml

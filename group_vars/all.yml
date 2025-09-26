@@ -11,6 +11,11 @@ db_user: "webapp_user"
 db_password: "{{ vault_db_password }}"
 db_host: "192.168.254.124"
 
+# Security settings
+webapp_jwt_secret: "{{ vault_jwt_secret }}"
+webapp_admin_password: "{{ vault_admin_password }}"
+webapp_api_keys: "{{ vault_api_keys }}"
+
 # Git repository
 git_repo: "https://github.com/yourusername/your-repo.git"
 git_branch: "main"
