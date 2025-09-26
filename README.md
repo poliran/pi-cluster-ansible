@@ -5,8 +5,11 @@ Production-ready Raspberry Pi cluster with Angular frontend, Node.js backend, an
 ## 🚀 Quick Start
 
 ```bash
-# Deploy cluster
-make install && make deploy
+# Install dependencies
+make install
+
+# Deploy cluster (will prompt for vault password)
+make deploy
 
 # Access dashboard
 open http://192.168.254.121/
@@ -33,6 +36,7 @@ open http://192.168.254.121/
 - **[Production Guide](docs/PRODUCTION.md)** - Complete production deployment guide
 - **[Architecture](docs/ARCHITECTURE.md)** - System architecture and design
 - **[Deployment](docs/DEPLOYMENT.md)** - Step-by-step deployment instructions
+- **[Vault Usage](docs/VAULT.md)** - Ansible Vault secrets management
 - **[API Documentation](docs/API.md)** - REST API reference
 - **[Troubleshooting](docs/TROUBLESHOOTING.md)** - Common issues and solutions
 - **[Operations Runbook](docs/OPERATIONS.md)** - Daily operations and maintenance
@@ -63,7 +67,7 @@ pi-db:   192.168.254.124 (MariaDB Database Server)
 # Install dependencies
 make install
 
-# Deploy the cluster
+# Deploy the cluster (prompts for vault password)
 make deploy
 
 # Validate deployment
@@ -72,14 +76,14 @@ make validate
 
 ### Manual Deployment
 ```bash
-# Deploy all services
-ansible-playbook playbooks/site.yml
+# Deploy all services (with vault password)
+ansible-playbook playbooks/site.yml --ask-vault-pass
 
 # Deploy specific components
-ansible-playbook playbooks/site.yml --tags database
-ansible-playbook playbooks/site.yml --tags webapp
-ansible-playbook playbooks/site.yml --tags nginx
-ansible-playbook playbooks/site.yml --tags angular
+ansible-playbook playbooks/site.yml --tags database --ask-vault-pass
+ansible-playbook playbooks/site.yml --tags webapp --ask-vault-pass
+ansible-playbook playbooks/site.yml --tags nginx --ask-vault-pass
+ansible-playbook playbooks/site.yml --tags angular --ask-vault-pass
 ```
 
 ## 📊 Features
@@ -160,6 +164,7 @@ tar -czf cluster-config-$(date +%Y%m%d).tar.gz inventories/ group_vars/
 ### Global Settings
 Edit variables in:
 - `group_vars/all.yml` - Global cluster settings
+- `group_vars/all/vault.yml` - Encrypted secrets (use ansible-vault)
 - `group_vars/[group].yml` - Group-specific settings
 - `host_vars/[host].yml` - Host-specific settings
 
@@ -167,6 +172,7 @@ Edit variables in:
 ```
 inventories/production/hosts     # Server inventory
 group_vars/all.yml              # Global variables
+group_vars/all/vault.yml        # Encrypted secrets
 roles/*/defaults/main.yml       # Role-specific defaults
 ```
 
@@ -209,11 +215,25 @@ See [Troubleshooting Guide](docs/TROUBLESHOOTING.md) for detailed solutions.
 ## 🔒 Security
 
 ### Implemented Security
-- SSH key-based authentication
-- Firewall rules (UFW)
-- Database user isolation
-- Security headers via nginx
-- Input validation and sanitization
+- **Ansible Vault**: Encrypted secrets management
+- **SSH Key Authentication**: No password-based access
+- **Host Key Verification**: Enabled for all connections
+- **Firewall Rules**: UFW configuration
+- **Database Isolation**: Dedicated user with limited privileges
+- **Security Headers**: Implemented via nginx
+- **Input Validation**: Backend sanitization
+
+### Secrets Management
+```bash
+# Edit encrypted secrets
+ansible-vault edit group_vars/all/vault.yml
+
+# View vault contents
+ansible-vault view group_vars/all/vault.yml
+
+# Change vault password
+ansible-vault rekey group_vars/all/vault.yml
+```
 
 ### Production Recommendations
 - SSL/TLS certificates (Let's Encrypt)
@@ -238,6 +258,7 @@ See [Troubleshooting Guide](docs/TROUBLESHOOTING.md) for detailed solutions.
 - **FQCN Compliance**: All modules use fully qualified names
 - **Variable Naming**: Consistent role-prefixed conventions
 - **Security Standards**: Industry best practices implemented
+- **Secrets Management**: Encrypted with Ansible Vault
 
 ### Testing & Validation
 - **5 validation playbooks** for comprehensive testing

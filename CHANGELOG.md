@@ -5,6 +5,31 @@ All notable changes to the Pi Cluster Ansible project will be documented in this
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.0] - 2024-09-26
+
+### Added
+- **Ansible Vault Integration**: Encrypted secrets management
+  - Created `group_vars/all/vault.yml` for sensitive data
+  - Added vault documentation in `docs/VAULT.md`
+  - Updated Makefile with `--ask-vault-pass` flags
+
+### Security
+- **Enhanced Security Configuration**
+  - Enabled host key checking in ansible.cfg
+  - Moved all passwords to encrypted vault
+  - Implemented proper secrets management workflow
+
+### Fixed
+- **Code Quality Improvements**
+  - Fixed all ansible-lint trailing space violations
+  - Achieved 0 lint violations (production-ready)
+  - Updated documentation with vault usage
+
+### Changed
+- Updated deployment commands to require vault password
+- Enhanced README with security and vault sections
+- Improved configuration documentation
+
 ## [1.0.0] - 2024-12-25
 
 ### Added
